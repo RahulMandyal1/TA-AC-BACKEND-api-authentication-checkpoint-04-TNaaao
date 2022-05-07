@@ -10,6 +10,8 @@ const usersRouter = require("./routes/users");
 const profileRouter = require("./routes/profiles");
 const questionRouter = require("./routes/questions");
 const answersRouter = require("./routes/answers");
+const adminRouter = require("./routes/admin");
+const auth = require("./middlewares/auth");
 const app = express();
 
 app.use(logger("dev"));
@@ -23,4 +25,8 @@ app.use("/api/v1/users", usersRouter);
 app.use("/api/v1/profile", profileRouter);
 app.use("/api/v1/questions", questionRouter);
 app.use("/api/v1/answers", answersRouter);
+
+//only admin can have access to these routes
+app.use(auth.isadmin);
+app.use("/api/v1/admindashboard", adminRouter);
 module.exports = app;

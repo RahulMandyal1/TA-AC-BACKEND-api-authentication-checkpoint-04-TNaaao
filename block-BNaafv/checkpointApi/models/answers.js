@@ -5,6 +5,8 @@ let answersSchema = new Schema(
     text: { type: String, required: true },
     author: { type: Schema.Types.ObjectId, ref: "User" },
     questionId: { type: Schema.Types.ObjectId, ref: "Question" },
+    upvote: { type: Number, default: 0 },
+    comments: [{ type: Schema.Types.ObjectId, ref: "Comment" }],
   },
   { timestamps: true }
 );

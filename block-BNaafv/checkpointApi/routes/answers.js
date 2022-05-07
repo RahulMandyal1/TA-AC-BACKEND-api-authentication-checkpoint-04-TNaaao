@@ -4,7 +4,7 @@ const auth = require("../middlewares/auth");
 const Question = require("../models/questions");
 const User = require("../models/users");
 const Answer = require("../models/answers");
-
+const Comment = require("../models/comments");
 //update an aswer
 router.put("/:answerId", auth.isVerified, async (req, res) => {
   try {
@@ -51,5 +51,36 @@ router.delete("/:answerId", auth.isVerified, async (req, res) => {
   } catch (err) {
     res.status(500).json({ error: "answer is not deleted" });
   }
+});
+
+//upvote user answer once the autheticated user clicks on  upvote button
+router.get("/:answerId/upvote", auth.isVerified, async (req, res) => {
+  try {
+    let upvoteAnswer = await Answer.findByIdAndUpdate(
+      req.params.answerId,
+      { $inc: { upvote: 1 } },
+      { new: true }
+    );
+    res.status(202).json({ answer: upvoteAnswer });
+  } catch (err) {
+    res.status(500).json({ error: "answer is not upvoted" });
+  }
+});
+
+/// add comments on  answer
+router.post("/:answerId/comment", auth.isVerified, async (req, res) => {
+  try {
+    req.body.author = req.user.id;
+    req.body.answerId = req.params.answerId;
+    let comment = await Comment.create(req.body);
+    let updatedAnswer = await Answer.findByIdAndUpdate(
+      req.params.answerId,
+      {
+        $push: { comments: comment._id },
+      },
+      { new: true }
+    );
+    res.status(201).json({ comment: comment });
+  } catch (err) {}
 });
 module.exports = router;
