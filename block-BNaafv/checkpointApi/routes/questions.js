@@ -4,6 +4,7 @@ const auth = require("../middlewares/auth");
 const Question = require("../models/questions");
 const User = require("../models/users");
 const Answer = require("../models/answers");
+const { route } = require(".");
 
 //get all the questions
 router.get("/", async (req, res) => {
@@ -109,6 +110,23 @@ router.post("/:questionid/answer", auth.isVerified, async (req, res) => {
     res.status(500).json({ error: "answer is not submitted" });
   }
 });
+
+
+
+//get all the answers of a question
+router.get("/:questionId/asnwers",auth.isVerified,async (req ,res)=>{
+  try{
+    let questionId = req.params.questionId;
+    let answers = await Answer.find({questionId : questionId}).populate({
+      path: "author",
+      select: ["username"],
+    });
+    res.status(202).json({answers : answers})
+  }
+  catch(err){
+    res.status(500).json({error : err})
+  }
+})
 
 
 

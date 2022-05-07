@@ -11,13 +11,20 @@ let userSchema = new mongoose.Schema({
   password: { type: String, required: true },
   bio: { type: String },
   avatar: { type: String },
-  questions: [{ type: Schema.Types.ObjectId, ref: "Question" }],
+  isadmin: { type: Boolean, default: false },
+  isBlocked: { type: Boolean, default: false },
+  followingList: [{ type: Schema.Types.ObjectId, ref: "User" }],
+  followersList: [{ type: Schema.Types.ObjectId, ref: "User" }],
 });
 
 // hash  the user password before saving user data sinto the database
 userSchema.pre("save", async function (req, res, next) {
   try {
     this.password = await bcrypt.hash(this.password, 10);
+    // it will change isverified to true only when if user is admin
+    if (isadmin(this.email)) {
+      this.isadmin = true;
+    }
     next();
   } catch (e) {
     res.status(500).json(e);
@@ -42,5 +49,14 @@ userSchema.methods.signToken = function () {
   }
 };
 let User = mongoose.model("User", userSchema);
+
+// function that will verify that user is admin or not
+function isadmin(useremail) {
+  let adminMails = process.env.ADMINMAILS;
+  if (adminMails.includes(useremail)) {
+    return true;
+  }
+  return false;
+}
 
 module.exports = User;
