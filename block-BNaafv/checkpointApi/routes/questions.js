@@ -19,6 +19,7 @@ router.get("/", async (req, res) => {
   }
 });
 
+
 //create a question
 router.post("/", auth.isVerified, async (req, res) => {
   try {
@@ -40,6 +41,7 @@ router.post("/", auth.isVerified, async (req, res) => {
     res.status(500).json({ question: "question is not created right now " });
   }
 });
+
 
 //update question
 router.put("/:slug", auth.isVerified, async (req, res) => {
@@ -71,6 +73,7 @@ router.put("/:slug", auth.isVerified, async (req, res) => {
   }
 });
 
+
 //delete an question only its creator can delete the question
 //other users are not authorized ot delete this question
 router.delete("/:slug", auth.isVerified, async (req, res) => {
@@ -88,6 +91,7 @@ router.delete("/:slug", auth.isVerified, async (req, res) => {
     res.status(500).json({ question: "question is not deleted " });
   }
 });
+
 
 //add an answer
 router.post("/:questionid/answer", auth.isVerified, async (req, res) => {
@@ -127,7 +131,24 @@ router.get("/:questionId/asnwers",auth.isVerified,async (req ,res)=>{
     res.status(500).json({error : err})
   }
 })
-
-
+ 
+// add comment on the question 
+router.post("/:questionId/comment", auth.isVerified, async (req, res) => {
+  try {
+    req.body.author = req.user.id;
+    req.body.questionId = req.params.questionId;
+    let comment = await Comment.create(req.body);
+    let updatedAnswer = await Question.findByIdAndUpdate(
+      req.params.questionId,
+      {
+        $push: { comments: comment._id },
+      },
+      { new: true }
+    );
+    res.status(201).json({ comment: comment });
+  } catch (err) {
+    res.status(500).json({error : " comment is not created "});
+  }
+});
 
 module.exports = router;
