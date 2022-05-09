@@ -10,8 +10,9 @@ router.get("/", function (req, res, next) {
 });
 
 // to create a user
-router.post("/register", async (req, res) => {
+router.post("/register", async (req, res, next) => {
   try {
+    console.log("this is to create account", req.body);
     let user = await User.create(req.body);
     let token = user.signToken();
     res.status(201).json({
@@ -21,30 +22,30 @@ router.post("/register", async (req, res) => {
         email: user.email,
       },
     });
-  } catch (err) {
-    res.json({ err: err });
+  } catch (error) {
+    next(error);
   }
 });
 
 // user login   using the password and the email
 
-router.post("/login", async (req, res) => {
+router.post("/login", async (req, res, next) => {
   try {
     let { email, password } = req.body;
     if (!email || !password) {
       return res
-        .status(500)
+        .status(400)
         .json({ error: "both password and email is required" });
     }
     let user = await User.findOne({ email: email });
     if (!user) {
-      return res.status(500).json({ error: "user is not registered" });
+      return res.status(400).json({ error: "user is not registered" });
     }
     // if the user is exits then compare  the password
     let isMatched = await bcrypt.compare(password, user.password);
     // if the password is not matched
     if (!isMatched) {
-      return res.status(500).json({ error: "user password is not matched" });
+      return res.status(400).json({ error: "user password is not matched" });
     }
     // if user password is mathced then generate  the user  jwt token
     // and send it to the user
@@ -56,12 +57,12 @@ router.post("/login", async (req, res) => {
         email: user.email,
       },
     });
-  } catch (e) {
-    res.status(500).json({ error: " there is an error in the user login" });
+  } catch (error) {
+    next(error);
   }
 });
 
-router.get("/currentuser", auth.isVerified, async (req, res) => {
+router.get("/currentuser", auth.isVerified, async (req, res, next) => {
   try {
     let currentuser = await User.findOne({ email: req.user.email });
     let token = currentuser.signToken();
@@ -72,8 +73,8 @@ router.get("/currentuser", auth.isVerified, async (req, res) => {
         email: currentuser.email,
       },
     });
-  } catch (err) {
-    res.status(500).json({ error: "no user is logged in right now" });
+  } catch (error) {
+    next(error);
   }
 });
 
