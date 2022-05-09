@@ -7,19 +7,19 @@ const Answer = require("../models/answers");
 const { route } = require(".");
 
 // only admin can have access  to these routes
-router.get("/", async (req, res) => {
+router.get("/", async (req, res, next) => {
   try {
     res
       .status(202)
       .json({ message: "this is the admin dashboard and admin is logged in" });
-  } catch (err) {
-    res.status(202).json({ error: err });
+  } catch (error) {
+    next(error);
   }
 });
 
 // block   a user
 
-router.get("/:username/block", async (req, res) => {
+router.get("/:username/block", async (req, res, next) => {
   try {
     let blockuser = await User.findOneAndUpdate(
       { username: req.params.username },
@@ -27,13 +27,13 @@ router.get("/:username/block", async (req, res) => {
       { new: true }
     );
     res.status(202).json({ user: blockuser });
-  } catch (err) {
-    res.status(500).json({ error: err });
+  } catch (error) {
+    next(error);
   }
 });
 //unblock a user
 
-router.get("/:username/unblock", async (req, res) => {
+router.get("/:username/unblock", async (req, res, next) => {
   try {
     let unblockuser = await User.findOneAndUpdate(
       { username: req.params.username },
@@ -41,8 +41,8 @@ router.get("/:username/unblock", async (req, res) => {
       { new: true }
     );
     res.status(202).json({ user: unblockuser });
-  } catch (err) {
-    res.status(500).json({ error: err });
+  } catch (error) {
+    next(error);
   }
 });
 

@@ -1,4 +1,133 @@
+## Authentication Header
+
+Add jwt token in Header(authorization)
+
+## status code
+
+202 : a sucess message
+401 : unauthorized requests when a user tries to access a resource without authentication
+400 : For bad request that server not able to resolve
+
 ## Endpoints
+
+### Authentication:
+
+`POST /api/v1/users/login`
+
+Example request body:
+
+```JSON
+{
+ eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjYyNzk0ZDY0N2RjYzY4ZmIyNzUzZDBlNSIsInVzZXJuYW1lIjoiUmFodWx0aGFrdXIiLCJlbWFpbCI6InVzZXJlbWFpbEBnbWFpbC5jb20iLCJpYXQiOjE2NTIxMTY4MzZ9.4-f2k-iiC5asXZhqV9WCcRDie5aKl1Ghn0IXlSItprQ
+}
+
+```
+
+- No authentication required, returns a logged in user
+
+```JSON
+{
+    "user": {
+        "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjYyNzk0ZDY0N2RjYzY4ZmIyNzUzZDBlNSIsInVzZXJuYW1lIjoiUmFodWx0aGFrdXIiLCJlbWFpbCI6InVzZXJlbWFpbEBnbWFpbC5jb20iLCJpYXQiOjE2NTIxMTY4MzZ9.4-f2k-iiC5asXZhqV9WCcRDie5aKl1Ghn0IXlSItprQ",
+        "username": "Rahulthakur",
+        "email": "useremail@gmail.com"
+    }
+}
+```
+
+## Registration
+
+`POST /api/v1/users/register`
+
+Example request body:
+
+```JSON
+{
+    "name" : "Rahul thakur",
+    "username" : "Rahulthakur",
+	"email" : "useremail@gmail.com",
+	"password" : "userpassword"
+}
+
+```
+
+-No authentication required.
+-Required Fields are `email , password , username`
+
+- Returns a user
+
+```JSON
+{
+    "user": {
+        "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjYyNzk0ZDY0N2RjYzY4ZmIyNzUzZDBlNSIsInVzZXJuYW1lIjoiUmFodWx0aGFrdXIiLCJlbWFpbCI6InVzZXJlbWFpbEBnbWFpbC5jb20iLCJpYXQiOjE2NTIxMTY4MzZ9.4-f2k-iiC5asXZhqV9WCcRDie5aKl1Ghn0IXlSItprQ",
+        "username": "Rahulthakur",
+        "email": "useremail@gmail.com"
+    }
+}
+```
+
+## Get current logged in user data
+
+`GET /api/v1/users/currentuser`
+
+- Authentication required .
+- Returns a currently logged in user
+
+```JSON
+{
+    "user": {
+        "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjYyNzk0ZDY0N2RjYzY4ZmIyNzUzZDBlNSIsInVzZXJuYW1lIjoiUmFodWx0aGFrdXIiLCJlbWFpbCI6InVzZXJlbWFpbEBnbWFpbC5jb20iLCJpYXQiOjE2NTIxMTY4MzZ9.4-f2k-iiC5asXZhqV9WCcRDie5aKl1Ghn0IXlSItprQ",
+        "username": "Rahulthakur",
+        "email": "useremail@gmail.com"
+    }
+}
+```
+
+## Get user profile
+
+- `GET /api/profiles/:username`
+- Authentication optional
+- Returns a user profile
+
+```JSON
+{
+    "profile": {
+        "name": "Rahul thakur",
+        "username": "Rahul thakur",
+        "image": "https://www.userimage/rahulthakur.com",
+        "bio": " a passionate full stack web developer . i love javascript"
+    }
+}
+```
+
+## Update user profile
+
+- `PUT /api/profiles/:username`
+- Authentication required
+- update account only when if the user is owner of that profile
+- optional fields `email , username , name , bio , avatar`
+Example reqest body
+
+```JSON
+ {
+        "bio": "currently a student soon to be a developer"
+}
+
+- Returns  an updated user
+```JSON
+{
+    "profile": {
+        "name": "Rahul thakur",
+        "username": "Rahul thakur",
+        "image": "https://www.userimage/rahulthakur.com",
+        "bio": "currently a student soon to be a developer"
+    }
+}
+```
+
+## Follow a user profile 
+
+
 
 ## List all the question
 
@@ -43,7 +172,7 @@
     }
   ]
 }
-```
+````
 
 ## create a question
 
@@ -95,6 +224,7 @@
     "tags" : "javascript,interviewquestion,asynchronousjs"
 }
 ```
+
 - Authentication Required
 - Requried fields: which field you want to update
 - Return an udpated question
@@ -151,16 +281,21 @@
     }
 }
 ```
+
 ## Create an answer
+
 - `POST /api/v1/question/questionId/answer`
+
 ```JSON
 {
     "text" :  "An event loop is something that pulls stuff out of the queue and places it onto the function execution stack whenever the function stack becomes empty.The event loop is the secret by which JavaScript gives us an illusion of being multithreaded even though it is single-threaded. The below illusion demonstrates the functioning of event loop well"
 }
 ```
+
 - Authentication Required
 - Requried fields: text
 - Return an answer
+
 ```JSON
 {
     "answer": {
@@ -181,8 +316,8 @@
 ## get all the answers of a question
 
 - `GET /api/v1/question/questionId/answers`
--- Authentication Required
--- Return all the answers of a question in this format
+  -- Authentication Required
+  -- Return all the answers of a question in this format
 
 ```JSON
 {
@@ -220,6 +355,7 @@
     ]
 }
 ```
+
 ## upvote an answer
 
 GET /api/v1/answers/answerid/upvote

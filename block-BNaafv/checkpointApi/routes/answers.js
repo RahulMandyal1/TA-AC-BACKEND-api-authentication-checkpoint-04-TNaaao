@@ -11,7 +11,7 @@ const Comment = require("../models/comments");
 router.use(auth.isAuthorized);
 
 //update an aswer
-router.put("/:answerId", auth.isVerified, async (req, res) => {
+router.put("/:answerId", auth.isVerified, async (req, res, next) => {
   try {
     let answer = await Answer.findById(req.params.answerId);
     // only the user who have submitted the answer can edit  update the answer
@@ -27,13 +27,13 @@ router.put("/:answerId", auth.isVerified, async (req, res) => {
     res.status(500).json({
       error: "sorry you are not authorized to edit other user answers",
     });
-  } catch (err) {
-    res.status(500).json({ error: "answer is not updated" });
+  } catch (error) {
+    next(error);
   }
 });
 
 //delete the answer
-router.delete("/:answerId", auth.isVerified, async (req, res) => {
+router.delete("/:answerId", auth.isVerified, async (req, res, next) => {
   try {
     let answer = await Answer.findById(req.params.answerId);
     // only the user who had created the answer can only delete the answer
@@ -52,13 +52,13 @@ router.delete("/:answerId", auth.isVerified, async (req, res) => {
     res.status(500).json({
       error: "sorry you are not authorized to delete other user answers",
     });
-  } catch (err) {
-    res.status(500).json({ error: "answer is not deleted" });
+  } catch (error) {
+    next(error);
   }
 });
 
 //upvote answer  one user can upvote for only single time
-router.get("/:answerId/upvote", auth.isVerified, async (req, res) => {
+router.get("/:answerId/upvote", auth.isVerified, async (req, res, next) => {
   try {
     let answer = await Answer.findById(req.params.answerId);
     // a user can upvote only once not multiple times
@@ -71,14 +71,14 @@ router.get("/:answerId/upvote", auth.isVerified, async (req, res) => {
       return res.status(202).json({ answer: upvoteAnswer });
     }
     res.status(500).json({ message: "you can not upvote multiple times" });
-  } catch (err) {
-    res.status(500).json({ error: "answer is not upvoted" });
+  } catch (error) {
+    next(error);
   }
 });
 
 //remove your  vote from answer but only those user can remove their vote whose
 // have voted  for a answer
-router.get("/:answerId/removevote", auth.isVerified, async (req, res) => {
+router.get("/:answerId/removevote", auth.isVerified, async (req, res, next) => {
   try {
     let answer = await Answer.findById(req.params.answerId);
     // a user can upvote only once not multiple times
@@ -91,13 +91,13 @@ router.get("/:answerId/removevote", auth.isVerified, async (req, res) => {
       return res.status(202).json({ answer: removeUpvote });
     }
     res.status(500).json({ message: "you  have not added a vote yet " });
-  } catch (err) {
-    res.status(500).json({ error: "your vote on answer is not removed" });
+  } catch (error) {
+    next(error);
   }
 });
 
 /// add comments on  answer
-router.post("/:answerId/comment", auth.isVerified, async (req, res) => {
+router.post("/:answerId/comment", auth.isVerified, async (req, res, next) => {
   try {
     req.body.author = req.user.id;
     req.body.answerId = req.params.answerId;
@@ -110,6 +110,8 @@ router.post("/:answerId/comment", auth.isVerified, async (req, res) => {
       { new: true }
     );
     res.status(201).json({ comment: comment });
-  } catch (err) {}
+  } catch (error) {
+    next(error);
+  }
 });
 module.exports = router;
