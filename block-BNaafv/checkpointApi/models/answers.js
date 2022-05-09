@@ -5,7 +5,8 @@ let answersSchema = new Schema(
     text: { type: String, required: true },
     author: { type: Schema.Types.ObjectId, ref: "User" },
     questionId: { type: Schema.Types.ObjectId, ref: "Question" },
-    upvote: { type: Number, default: 0 },
+    upvoteCount: { type: Number, default: 0 },
+    upvotedBy: [{ type: mongoose.Types.ObjectId, ref: "User" }],
     comments: [{ type: Schema.Types.ObjectId, ref: "Comment" }],
   },
   { timestamps: true }

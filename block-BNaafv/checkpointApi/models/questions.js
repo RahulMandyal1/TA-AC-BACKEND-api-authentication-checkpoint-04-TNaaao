@@ -9,6 +9,8 @@ const questionSchema = new Schema(
     slug: { type: String },
     answers: [{ type: Schema.Types.ObjectId, ref: "Answer" }],
     comments: [{ type: Schema.Types.ObjectId, ref: "Comment" }],
+    upvoteCount: { types: Number, default: 0 },
+    upvotedBy: [{ type: mongoose.Types.ObjectId, ref: "User" }],
   },
   { timestamps: true }
 );

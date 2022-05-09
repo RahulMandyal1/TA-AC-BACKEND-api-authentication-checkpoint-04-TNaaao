@@ -21,6 +21,11 @@ router.get("/:username", auth.isVerified, async (req, res) => {
   }
 });
 
+
+// a blocked user can have no longer access to these routes
+router.use(auth.isAuthorized);
+
+
 // update user information only logged in user can update their account only
 router.put("/:username", auth.isVerified, async (req, res) => {
   try {
@@ -63,18 +68,14 @@ router.get("/:username/follow", auth.isVerified, async (req, res, next) => {
 
     // now update again if one user has followed then it should be
     //reflected back in other user data so update the second user follower list
-    let updateFollowerList = await User.findByIdAndUpdate(
+    let targetedUser= await User.findByIdAndUpdate(
       user._id,
       {
         $push: { followersList: updateProfile._id },
       },
       { new: true }
     );
-    console.log(
-      " this is the udpated profile of following user",
-      updateFollowerList
-    );
-    res.status(202).json({ user: updateProfile });
+    res.status(202).json({ user: updateProfile , targetedUser : targetedUser });
   } catch (e) {
     res.status(500).json({ error: e });
   }
@@ -97,13 +98,12 @@ router.get("/:username/unfollow", auth.isVerified, async (req, res, next) => {
     );
     // also remove  form the user follower list whose follower is going to lose
     // once a user has unfollowed him it should reflect also in his data
-    let updateFollowerlist = await User.findOneAndUpdate(
+    let targetedUser = await User.findOneAndUpdate(
       { username: username },
       { $pull: { followersList: req.user.id } },
       { new: true }
     );
-    console.log(updateFollowerlist);
-    res.status(202).json({ user: updateProfile });
+    res.status(202).json({ user: updateProfile  ,targetedUser : targetedUser});
   } catch (e) {
     res.status(500).json({ error: e });
   }

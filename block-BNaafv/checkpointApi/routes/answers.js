@@ -5,6 +5,11 @@ const Question = require("../models/questions");
 const User = require("../models/users");
 const Answer = require("../models/answers");
 const Comment = require("../models/comments");
+
+
+// a blocked user can have no longer access to these routes
+router.use(auth.isAuthorized);
+
 //update an aswer
 router.put("/:answerId", auth.isVerified, async (req, res) => {
   try {
@@ -39,7 +44,6 @@ router.delete("/:answerId", auth.isVerified, async (req, res) => {
         { $pull: { answers: answer._id } },
         { new: true }
       );
-      console.log("removed the reference", removeReference);
       //   return updated answer
       return res.status(200).json({ answer: removedAnswer });
     }
@@ -53,17 +57,42 @@ router.delete("/:answerId", auth.isVerified, async (req, res) => {
   }
 });
 
-//upvote user answer once the autheticated user clicks on  upvote button
+//upvote answer  one user can upvote for only single time
 router.get("/:answerId/upvote", auth.isVerified, async (req, res) => {
   try {
-    let upvoteAnswer = await Answer.findByIdAndUpdate(
-      req.params.answerId,
-      { $inc: { upvote: 1 } },
-      { new: true }
-    );
-    res.status(202).json({ answer: upvoteAnswer });
+    let answer = await Answer.findById(req.params.answerId);
+    // a user can upvote only once not multiple times
+    if (!answer.upvotedBy.includes(req.user.id)) {
+      let upvoteAnswer = await Answer.findByIdAndUpdate(
+        req.params.answerId,
+        { $inc: { upvoteCount: 1 }, $push: { upvotedBy: req.user.id } },
+        { new: true }
+      );
+      return res.status(202).json({ answer: upvoteAnswer });
+    }
+    res.status(500).json({ message: "you can not upvote multiple times" });
   } catch (err) {
     res.status(500).json({ error: "answer is not upvoted" });
+  }
+});
+
+//remove your  vote from answer but only those user can remove their vote whose
+// have voted  for a answer
+router.get("/:answerId/removevote", auth.isVerified, async (req, res) => {
+  try {
+    let answer = await Answer.findById(req.params.answerId);
+    // a user can upvote only once not multiple times
+    if (answer.upvotedBy.includes(req.user.id)) {
+      let removeUpvote = await Answer.findByIdAndUpdate(
+        req.params.answerId,
+        { $inc: { upvoteCount: -1 }, $pull: { upvotedBy: req.user.id } },
+        { new: true }
+      );
+      return res.status(202).json({ answer: removeUpvote });
+    }
+    res.status(500).json({ message: "you  have not added a vote yet " });
+  } catch (err) {
+    res.status(500).json({ error: "your vote on answer is not removed" });
   }
 });
 
