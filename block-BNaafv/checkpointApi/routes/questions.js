@@ -5,6 +5,7 @@ const Question = require("../models/questions");
 const User = require("../models/users");
 const Answer = require("../models/answers");
 const { route } = require(".");
+const app = require("../app");
 
 //get all the questions
 router.get("/", async (req, res) => {
@@ -19,6 +20,22 @@ router.get("/", async (req, res) => {
   }
 });
 
+//get all the answers of a question
+router.get("/:questionId/answers", auth.isVerified, async (req, res) => {
+  try {
+    let questionId = req.params.questionId;
+    let answers = await Answer.find({ questionId: questionId }).populate({
+      path: "author",
+      select: ["username"],
+    });
+    res.status(202).json({ answers: answers });
+  } catch (err) {
+    res.status(500).json({ error: err });
+  }
+});
+
+// a blocked user can have no longer access to these routes
+router.use(auth.isAuthorized);
 
 //create a question
 router.post("/", auth.isVerified, async (req, res) => {
@@ -41,7 +58,6 @@ router.post("/", auth.isVerified, async (req, res) => {
     res.status(500).json({ question: "question is not created right now " });
   }
 });
-
 
 //update question
 router.put("/:slug", auth.isVerified, async (req, res) => {
@@ -73,7 +89,6 @@ router.put("/:slug", auth.isVerified, async (req, res) => {
   }
 });
 
-
 //delete an question only its creator can delete the question
 //other users are not authorized ot delete this question
 router.delete("/:slug", auth.isVerified, async (req, res) => {
@@ -91,7 +106,6 @@ router.delete("/:slug", auth.isVerified, async (req, res) => {
     res.status(500).json({ question: "question is not deleted " });
   }
 });
-
 
 //add an answer
 router.post("/:questionid/answer", auth.isVerified, async (req, res) => {
@@ -115,24 +129,7 @@ router.post("/:questionid/answer", auth.isVerified, async (req, res) => {
   }
 });
 
-
-
-//get all the answers of a question
-router.get("/:questionId/asnwers",auth.isVerified,async (req ,res)=>{
-  try{
-    let questionId = req.params.questionId;
-    let answers = await Answer.find({questionId : questionId}).populate({
-      path: "author",
-      select: ["username"],
-    });
-    res.status(202).json({answers : answers})
-  }
-  catch(err){
-    res.status(500).json({error : err})
-  }
-})
- 
-// add comment on the question 
+// add comment on the question
 router.post("/:questionId/comment", auth.isVerified, async (req, res) => {
   try {
     req.body.author = req.user.id;
@@ -147,8 +144,44 @@ router.post("/:questionId/comment", auth.isVerified, async (req, res) => {
     );
     res.status(201).json({ comment: comment });
   } catch (err) {
-    res.status(500).json({error : " comment is not created "});
+    res.status(500).json({ error: " comment is not created " });
   }
 });
 
+//upvote question .One user can upvote for only single time
+router.get("/:questionId/upvote", auth.isVerified, async (req, res) => {
+  try {
+    let question = await Question.findById(req.params.questionId);
+    // a user can upvote only once not multiple times
+    if (!question.upvotedBy.includes(req.user.id)) {
+      let upvoteQuestion = await Question.findByIdAndUpdate(
+        req.params.questionId,
+        { $inc: { upvoteCount: 1 }, $push: { upvotedBy: req.user.id } },
+        { new: true }
+      );
+      return res.status(202).json({ upvotedQuestion: upvoteQuestion });
+    }
+    res.status(500).json({ message: "you can not upvote multiple times" });
+  } catch (err) {
+    res.status(500).json({ error: "question is not upvoted" });
+  }
+});
+
+// remove your upvote form the question and delete its reference
+router.get("/:questionId/removevote", auth.isVerified, async (req, res) => {
+  try {
+    let question = await Question.findById(req.params.questionId);
+    if (question.upvotedBy.includes(req.user.id)) {
+      let removeUpvote = await Question.findByIdAndUpdate(
+        req.params.questionId,
+        { $inc: { upvoteCount: -1 }, $pull: { upvotedBy: req.user.id } },
+        { new: true }
+      );
+      return res.status(202).json({ upvotedQuestion: removeUpvote });
+    }
+    res.status(500).json({ message: "you have not voted yet" });
+  } catch (err) {
+    res.status(500).json({ error: "your vote is not removed" });
+  }
+});
 module.exports = router;
