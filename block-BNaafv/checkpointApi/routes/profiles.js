@@ -2,19 +2,14 @@ const express = require("express");
 const router = express.Router();
 const User = require("../models/users");
 const auth = require("../middlewares/auth");
-
+let dataformat = require("../helpers/formatdata");
+let { userJSON, userProfile } = dataformat;
 //get user profile data
 router.get("/:username", auth.isVerified, async (req, res, next) => {
   try {
     let user = await User.findOne({ username: req.params.username });
-    res.status(202).json({
-      profile: {
-        name: user.name,
-        username: user.username,
-        image: user.avatar,
-        bio: user.bio,
-      },
-    });
+    console.log(" This  is the user that we have to  found", user);
+    res.status(202).json({ profile: userProfile(user) });
   } catch (error) {
     next(error);
   }
@@ -31,17 +26,10 @@ router.put("/:username", auth.isVerified, async (req, res, next) => {
       let updatedProfile = await User.findByIdAndUpdate(user._id, req.body, {
         new: true,
       });
-      res.status(202).json({
-        profile: {
-          name: updatedProfile.name,
-          username: updatedProfile.username,
-          image: updatedProfile.avatar,
-          bio: updatedProfile.bio,
-        },
-      });
+      res.status(202).json({ profile: userProfile(updatedProfile) });
     }
     res
-      .status(400)
+      .status(403)
       .json({ error: " you are not authorized user login with your account" });
   } catch (error) {
     next(error);
@@ -53,6 +41,12 @@ router.get("/:username/follow", auth.isVerified, async (req, res, next) => {
   try {
     let username = req.params.username;
     let user = await User.findOne({ username: username });
+    //if no targated user is found with this usernmae then show this error
+    if (!user) {
+      return res
+        .status(400)
+        .json({ message: "there is no user with this username" });
+    }
     let updateProfile = await User.findByIdAndUpdate(
       req.user.id,
       {
@@ -72,14 +66,18 @@ router.get("/:username/follow", auth.isVerified, async (req, res, next) => {
       },
       { new: true }
     );
-    res.status(202).json({ user: updateProfile, targetedUser: targetedUser });
+
+    res.status(202).json({
+      user: userProfile(updateProfile),
+      targetedUser: userProfile(targetedUser),
+    });
   } catch (error) {
     next(error);
   }
 });
 
 //unfollow the user
-router.get("/:username/unfollow", auth.isVerified, async (req, res, next) => {
+router.delete("/:username/follow", auth.isVerified, async (req, res, next) => {
   try {
     let username = req.params.username;
     let user = await User.findOne({ username: username });
@@ -100,7 +98,11 @@ router.get("/:username/unfollow", auth.isVerified, async (req, res, next) => {
       { $pull: { followersList: req.user.id } },
       { new: true }
     );
-    res.status(202).json({ user: updateProfile, targetedUser: targetedUser });
+
+    res.status(202).json({
+      user: userProfile(updateProfile),
+      targetedUser: userProfile(targetedUser),
+    });
   } catch (error) {
     next(error);
   }

@@ -6,29 +6,35 @@ const User = require("../models/users");
 const Answer = require("../models/answers");
 const { route } = require(".");
 const app = require("../app");
-
+const Comment = require("../models/comments");
+let dataformat = require("../helpers/formatdata");
+let {
+  userJSON,
+  userProfile,
+  formatQuestion,
+  formatQuestions,
+  formatAnswer,
+  formatAnswers,
+  formatComment,
+} = dataformat;
 //get all the questions
 router.get("/", async (req, res, next) => {
   try {
-    let questions = await Question.find({}).populate({
-      path: "author",
-      select: ["username"],
-    });
-    res.status(202).json({ questions: questions });
+    let questions = await Question.find({}).populate("author");
+    res.status(202).json({ questions: formatQuestions(questions) });
   } catch (error) {
     next(error);
   }
 });
 
 //get all the answers of a question
-router.get("/:questionId/answers", auth.isVerified, async (req, res, next) => {
+router.get("/:questionId/answers", async (req, res, next) => {
   try {
     let questionId = req.params.questionId;
-    let answers = await Answer.find({ questionId: questionId }).populate({
-      path: "author",
-      select: ["username"],
-    });
-    res.status(202).json({ answers: answers });
+    let answers = await Answer.find({ questionId: questionId }).populate(
+      "author"
+    );
+    res.status(202).json({ answers: formatAnswers(answers) });
   } catch (error) {
     next(error);
   }
@@ -52,7 +58,8 @@ router.post("/", auth.isVerified, async (req, res, next) => {
       },
       { new: true }
     );
-    res.status(201).json({ question: question });
+    question = await Question.findById(question._id).populate("author");
+    res.status(201).json({ question: formatQuestion(question) });
   } catch (error) {
     next(error);
   }
@@ -78,11 +85,11 @@ router.put("/:slug", auth.isVerified, async (req, res, next) => {
         question._id,
         req.body,
         { new: true }
-      );
-      res.status(201).json({ question: updatedQuestion });
+      ).populate("author");
+      res.status(201).json({ question: formatQuestion(updatedQuestion) });
     }
     // if user is not author of this article then
-    res.status(400).json({ error: "sorry you are not authorized to update" });
+    res.status(401).json({ error: "sorry you are not authorized to update" });
   } catch (error) {
     next(error);
   }
@@ -97,7 +104,13 @@ router.delete("/:slug", auth.isVerified, async (req, res, next) => {
     if (question.author == req.user.id) {
       //udpate question
       const deletedQuestion = await Question.findByIdAndDelete(question._id);
-      res.status(201).json({ question: deletedQuestion });
+      const deleteAnswer = await Answer.deleteMany({
+        questionId: deletedQuestion._id,
+      });
+      const deleteQuestionComment = await Comment.deleteMany({
+        questionId: deletedQuestion._id,
+      });
+      res.status(201).json({ message: "article deleted sucessfully" });
     }
     // if user is not author of this article then
     res.status(400).json({ error: "sorry you are not authorized to delete" });
@@ -121,8 +134,9 @@ router.post("/:questionid/answer", auth.isVerified, async (req, res, next) => {
       },
       { new: true }
     );
+    answer = await Answer.findById(answer._id).populate("author");
     //return the created answer
-    res.status(201).json({ answer: answer });
+    res.status(201).json({ answer: formatAnswer(answer) });
   } catch (error) {
     next(error);
   }
@@ -141,7 +155,9 @@ router.post("/:questionId/comment", auth.isVerified, async (req, res, next) => {
       },
       { new: true }
     );
-    res.status(201).json({ comment: comment });
+    comment = await Comment.findById(comment._id).populate("author");
+    console.log(" this is the comment i have created now ", comment);
+    res.status(201).json({ comment: formatComment(comment) });
   } catch (error) {
     next(error);
   }
@@ -157,8 +173,10 @@ router.get("/:questionId/upvote", auth.isVerified, async (req, res, next) => {
         req.params.questionId,
         { $inc: { upvoteCount: 1 }, $push: { upvotedBy: req.user.id } },
         { new: true }
-      );
-      return res.status(202).json({ upvotedQuestion: upvoteQuestion });
+      ).populate("author");
+      return res
+        .status(202)
+        .json({ upvotedQuestion: formatQuestion(upvoteQuestion) });
     }
     res.status(400).json({ message: "you can not upvote multiple times" });
   } catch (error) {
@@ -178,8 +196,10 @@ router.get(
           req.params.questionId,
           { $inc: { upvoteCount: -1 }, $pull: { upvotedBy: req.user.id } },
           { new: true }
-        );
-        return res.status(202).json({ upvotedQuestion: removeUpvote });
+        ).populate("author");
+        return res
+          .status(202)
+          .json({ upvotedQuestion: formatQuestion(removeUpvote) });
       }
       res.status(400).json({ message: "you have not voted yet" });
     } catch (error) {
