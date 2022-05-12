@@ -4,16 +4,16 @@ Add jwt token in Header(authorization)
 
 ## status code
 
-202 : a sucess message
-401 : unauthorized requests when a user tries to access a resource without authentication
-400 : For bad request that server not able to resolve
+- 202 : a sucess message
+- 401 : unauthorized requests when a user tries to access a resource without authentication
+- 400 : For bad request that server not able to resolve
 
 ## Endpoints
 
 ### Authentication:
 
--`POST /api/v1/users/login`
-Example request body:
+- `POST /api/v1/users/login`
+- Example request body:
 
 ```JSON
 {
@@ -22,8 +22,8 @@ Example request body:
 }
 ```
 
-Required field are : `email , password`
-No authentication required, returns a logged in user
+- Required field are : `email , password`
+- No authentication required, returns a logged in user
 
 ```JSON
 {
@@ -37,9 +37,8 @@ No authentication required, returns a logged in user
 
 ## Registration
 
--`POST /api/v1/users/register`
-
-Example request body:
+- `POST /api/v1/users/register`
+- Example request body:
 
 ```JSON
 {
@@ -52,8 +51,8 @@ Example request body:
 
 ```
 
-No authentication required.
-Required Fields are `email , password , username`
+- No authentication required.
+- Required Fields are `email , password , username`
 
 - Returns a user
 
@@ -69,10 +68,10 @@ Required Fields are `email , password , username`
 
 ## Get current logged in user data
 
--`GET /api/v1/users/currentuser`
+- `GET /api/v1/users/currentuser`
 
--Authentication required .
--Returns a currently logged in user
+- Authentication required .
+- Returns a currently logged in user
 
 ```JSON
 {
@@ -106,9 +105,9 @@ Required Fields are `email , password , username`
 
 - `PUT /api/profiles/:username`
 -  Authentication required
- - update account only when if the user is owner of that profile
- - optional fields `email , username , name , bio , avatar`
- - Example request body
+- update account only when if the user is owner of that profile
+- optional fields `email , username , name , bio , avatar`
+- Example request body
 
 ````JSON
  {
@@ -131,7 +130,7 @@ Required Fields are `email , password , username`
 ## Follow a user profile
 
 - `GET /api/v1/profile/username/follow`
-- Authentication required
+-  Authentication required
 -  Returns a current user profile and target user profile whom you are following
 
 - Response Example :
@@ -159,7 +158,7 @@ Required Fields are `email , password , username`
 ## Unfollow a user
 
 - ` DELETE /api/v1/profile/username/follow`
-- Authentication required
+-  Authentication required
 -  Returns a current user profile and target user profile whom you are unfollowing
 
 - Response Example :
@@ -186,10 +185,10 @@ Required Fields are `email , password , username`
 
 ## List all the question
 
-- `GET /api/v1/questions`
-- Authentication optional
+-  `GET /api/v1/questions`
+-  Authentication optional
 -  Return a list of questions
-- Response format example
+-  Response format example
 
 ```JSON
 {
@@ -324,8 +323,8 @@ Required Fields are `email , password , username`
 
 ## Create comment on question 
 - `POST /api/v1/questions/questionId/comment`
--   Authentication Required 
--   Required Fields: `content`
+-  Authentication Required 
+-  Required Fields: `content`
 
 -Request body Example
 
@@ -440,7 +439,7 @@ Required Fields are `email , password , username`
 - Authentication Required
 - Return an update answer
 
-## udpate an answer
+## Udpate an answer
 
 - `PUT /api/v1/answers/id`
 -  Authentication Required only user who created answer can update answer.
