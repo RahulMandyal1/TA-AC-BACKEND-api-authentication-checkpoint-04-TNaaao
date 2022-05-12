@@ -104,9 +104,6 @@ router.delete("/:slug", auth.isVerified, async (req, res, next) => {
     if (question.author == req.user.id) {
       //udpate question
       const deletedQuestion = await Question.findByIdAndDelete(question._id);
-      const deleteAnswer = await Answer.deleteMany({
-        questionId: deletedQuestion._id,
-      });
       const deleteQuestionComment = await Comment.deleteMany({
         questionId: deletedQuestion._id,
       });
@@ -156,7 +153,6 @@ router.post("/:questionId/comment", auth.isVerified, async (req, res, next) => {
       { new: true }
     );
     comment = await Comment.findById(comment._id).populate("author");
-    console.log(" this is the comment i have created now ", comment);
     res.status(201).json({ comment: formatComment(comment) });
   } catch (error) {
     next(error);

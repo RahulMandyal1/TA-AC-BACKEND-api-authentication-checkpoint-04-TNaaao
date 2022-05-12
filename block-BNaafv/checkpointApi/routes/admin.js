@@ -5,7 +5,8 @@ const Question = require("../models/questions");
 const User = require("../models/users");
 const Answer = require("../models/answers");
 const { route } = require(".");
-
+const dataformat = require("../helpers/formatdata");
+let userProfile = dataformat.userProfile;
 // only admin can have access  to these routes
 router.get("/", async (req, res, next) => {
   try {
@@ -25,8 +26,8 @@ router.get("/:username/block", async (req, res, next) => {
       { username: req.params.username },
       { isblocked: true },
       { new: true }
-    );
-    res.status(202).json({ user: blockuser });
+    ).populate("author");
+    res.status(202).json({ user: userProfile(blockuser) });
   } catch (error) {
     next(error);
   }
@@ -39,8 +40,8 @@ router.get("/:username/unblock", async (req, res, next) => {
       { username: req.params.username },
       { isblocked: false },
       { new: true }
-    );
-    res.status(202).json({ user: unblockuser });
+    ).populate("author");
+    res.status(202).json({ user: userProfile(unblockuser) });
   } catch (error) {
     next(error);
   }

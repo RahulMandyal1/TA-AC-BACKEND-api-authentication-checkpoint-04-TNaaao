@@ -9,6 +9,7 @@ function userJSON(user, token) {
 // to format user profile
 function userProfile(user) {
   return {
+    id: user._id,
     name: user.name,
     username: user.username,
     bio: user.bio,
