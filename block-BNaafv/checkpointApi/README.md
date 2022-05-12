@@ -71,8 +71,8 @@ Required Fields are `email , password , username`
 
 -`GET /api/v1/users/currentuser`
 
-Authentication required .
-Returns a currently logged in user
+-Authentication required .
+-Returns a currently logged in user
 
 ```JSON
 {
@@ -87,8 +87,8 @@ Returns a currently logged in user
 ## Get user profile
 
 - `GET /api/profiles/:username`
-  Authentication optional
-  Returns a user profile
+- Authentication optional
+- Returns a user profile
 
 ```JSON
 {
@@ -105,17 +105,17 @@ Returns a currently logged in user
 ## Update user profile
 
 - `PUT /api/profiles/:username`
-  Authentication required
-  update account only when if the user is owner of that profile
-  optional fields `email , username , name , bio , avatar`
-  Example request body
+-  Authentication required
+ - update account only when if the user is owner of that profile
+ - optional fields `email , username , name , bio , avatar`
+ - Example request body
 
 ````JSON
  {
         "bio": "currently a student soon to be a developer"
 }
 
-Returns  an updated user
+- Returns  an updated user
 ```JSON
 {
     "profile": {
@@ -131,8 +131,8 @@ Returns  an updated user
 ## Follow a user profile
 
 - `GET /api/v1/profile/username/follow`
-  Authentication required
-  Returns a current user profile and target user profile whom you are following
+- Authentication required
+-  Returns a current user profile and target user profile whom you are following
 
 - Response Example :
 
@@ -159,8 +159,8 @@ Returns  an updated user
 ## Unfollow a user
 
 - ` DELETE /api/v1/profile/username/follow`
-  Authentication required
-  Returns a current user profile and target user profile whom you are unfollowing
+- Authentication required
+-  Returns a current user profile and target user profile whom you are unfollowing
 
 - Response Example :
 
@@ -187,8 +187,8 @@ Returns  an updated user
 ## List all the question
 
 - `GET /api/v1/questions`
-  Authentication optional
-  Return a list of questions
+- Authentication optional
+-  Return a list of questions
 - Response format example
 
 ```JSON
@@ -263,12 +263,12 @@ Returns  an updated user
 }
 ```
 
-## create a question
+## Create a question
 
 - `POST /api/v1/question`
-  Authentication Required
-  Requried fields are : title , description , tags.
-  Return a created question.
+-  Authentication Required
+-  Requried fields are : title , description , tags.
+-  Return a created question.
 
 - Request body example
 
@@ -307,27 +307,27 @@ Returns  an updated user
 }
 ```
 
-## udpate an question
+## Udpate an question
 
 - `PUT /api/v1/question/slug`
-  Authentication Required only user who created question can update question.
-  Requried fields: which field you want to update
-  Return an udpated question
+-  Authentication Required only user who created question can update question.
+-  Requried fields: which field you want to update
+-  Return an udpated question
 
 ## Delete an question
 
 - `DELETE /api/v1/question/slug`
-  Authentication Required. User who created question can only delete question.
-  Delete question along with its all reference.
-  Return an deleted question.
+-  Authentication Required. User who created question can only delete question.
+-  Delete question along with its all reference.
+-  Return an deleted question.
 
 
 ## Create comment on question 
 - `POST /api/v1/questions/questionId/comment`
-   Authentication Required 
-   Required Fields: `content`
+-   Authentication Required 
+-   Required Fields: `content`
 
-Request body Example
+-Request body Example
 
 ```JSON
 {
@@ -375,9 +375,9 @@ Request body Example
 ## Create an answer
 
 - `POST /api/v1/question/questionId/answer`
-  Authentication Required
-  Requried fields: text
-  Return an answer
+-  Authentication Required
+-  Requried fields: text
+-  Return an answer
 
 ```JSON
 {
@@ -388,8 +388,8 @@ Request body Example
 ## get all the answers of a question
 
 - `GET /api/v1/question/questionId/answers`
-  -- Authentication Required
-  -- Return all the answers of a question in this format
+- Authentication Required
+- Return all the answers of a question in this format
 
 ```JSON
 {
@@ -429,38 +429,38 @@ Request body Example
 }
 ```
 
-## upvote an answer
+## Upvote an answer
 
 - `GET /api/v1/answers/answerid/upvote`
- Authentication Required
- Return an update answer
+- Authentication Required
+- Return an update answer
 
-## devote user answer 
+## Devote user answer 
 - `DELETE /api/v1/answers/answerid/upvote`
- Authentication Required
- Return an update answer
+- Authentication Required
+- Return an update answer
 
 ## udpate an answer
 
 - `PUT /api/v1/answers/id`
-  Authentication Required only user who created answer can update answer.
-  Requried fields: `text`
-  Return an udpated answer
+-  Authentication Required only user who created answer can update answer.
+-  Requried fields: `text`
+-  Return an udpated answer
 
 ## Delete an answer
 
 - `DELETE /api/v1/answers/id`
-  Authentication Required only user who created answer can delete answer.
-  Return an deleted answer
-  Delete its all reference like delete all the comments 
+-  Authentication Required only user who created answer can delete answer.
+-  Return an deleted answer
+-  Delete its all reference like delete all the comments 
 
-## Create  an comment on question
+
 ## Create comment on question 
 - `POST /api/v1/answers/answerId/comment`
-   Authentication Required 
-   Required Fields: `content`
+-   Authentication Required 
+-   Required Fields: `content`
 
-Request body Example
+- Request body Example
 
 ```JSON
 {
@@ -486,16 +486,16 @@ Request body Example
 ```
 
 
-## admin protected routes 
+## Admin protected routes 
 - Only admin have access to these routes 
 
 
-## block a user 
+## Block a user 
 - `/api/v1/admindashboard/:username/block`
-Admin authentication is required / only admin have access to this route
-Return  a user profile which is blocked by admin
+- Admin authentication is required / only admin have access to this route
+- Return  a user profile which is blocked by admin
 
-## unblock a user 
+## Unblock a user 
 - `/api/v1/admindashboard/:username/unblock`
-Admin authentication is required / only admin have access to this route
-Return  a user profile which is unblocked by admin
+- Admin authentication is required / only admin have access to this route
+- Return  a user profile which is unblocked by admin
