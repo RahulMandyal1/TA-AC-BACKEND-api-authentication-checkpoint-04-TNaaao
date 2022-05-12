@@ -5,8 +5,16 @@ const Question = require("../models/questions");
 const User = require("../models/users");
 const Answer = require("../models/answers");
 const Comment = require("../models/comments");
-
-
+let dataformat = require("../helpers/formatdata");
+let {
+  userJSON,
+  userProfile,
+  formatQuestion,
+  formatQuestions,
+  formatAnswer,
+  formatAnswers,
+  formatComment,
+} = dataformat;
 // a blocked user can have no longer access to these routes
 router.use(auth.isAuthorized);
 
@@ -18,13 +26,13 @@ router.put("/:answerId", auth.isVerified, async (req, res, next) => {
     if (answer.author == req.user.id) {
       let updatedAnswer = await Answer.findByIdAndUpdate(answer._id, req.body, {
         new: true,
-      });
+      }).populate("author");
       //   return updated answer
-      return res.status(200).json({ answer: updatedAnswer });
+      return res.status(200).json({ answer: formatAnswer(updatedAnswer) });
     }
     // this will return only when if the user who is trying to edit
     // is not the same user who have created this answer
-    res.status(500).json({
+    res.status(400).json({
       error: "sorry you are not authorized to edit other user answers",
     });
   } catch (error) {
@@ -44,12 +52,13 @@ router.delete("/:answerId", auth.isVerified, async (req, res, next) => {
         { $pull: { answers: answer._id } },
         { new: true }
       );
+      let deleteComment = await Comment.deleteMany({ answerId: answer._id });
       //   return updated answer
-      return res.status(200).json({ answer: removedAnswer });
+      return res.status(200).json({ message: "article deleted sucessfully" });
     }
     // this will return only when if the user who is trying to delete
     // is not the same user who have created this answer
-    res.status(500).json({
+    res.status(400).json({
       error: "sorry you are not authorized to delete other user answers",
     });
   } catch (error) {
@@ -67,10 +76,10 @@ router.get("/:answerId/upvote", auth.isVerified, async (req, res, next) => {
         req.params.answerId,
         { $inc: { upvoteCount: 1 }, $push: { upvotedBy: req.user.id } },
         { new: true }
-      );
-      return res.status(202).json({ answer: upvoteAnswer });
+      ).populate("author");
+      return res.status(202).json({ answer: formatAnswer(upvoteAnswer) });
     }
-    res.status(500).json({ message: "you can not upvote multiple times" });
+    res.status(400).json({ message: "you can not upvote multiple times" });
   } catch (error) {
     next(error);
   }
@@ -87,10 +96,10 @@ router.get("/:answerId/removevote", auth.isVerified, async (req, res, next) => {
         req.params.answerId,
         { $inc: { upvoteCount: -1 }, $pull: { upvotedBy: req.user.id } },
         { new: true }
-      );
-      return res.status(202).json({ answer: removeUpvote });
+      ).populate("author");
+      return res.status(202).json({ answer: formatAnswer(removeUpvote) });
     }
-    res.status(500).json({ message: "you  have not added a vote yet " });
+    res.status(400).json({ message: "you  have not added a vote yet " });
   } catch (error) {
     next(error);
   }
@@ -109,7 +118,8 @@ router.post("/:answerId/comment", auth.isVerified, async (req, res, next) => {
       },
       { new: true }
     );
-    res.status(201).json({ comment: comment });
+    comment = await Comment.findById(comment._id).populate("author");
+    res.status(201).json({ comment: formatComment(comment) });
   } catch (error) {
     next(error);
   }

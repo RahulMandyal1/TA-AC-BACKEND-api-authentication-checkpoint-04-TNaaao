@@ -3,6 +3,8 @@ const router = express.Router();
 const bcrypt = require("bcrypt");
 const User = require("../models/users");
 const auth = require("../middlewares/auth");
+let dataformat = require("../helpers/formatdata");
+let { userJSON, userProfile } = dataformat;
 require("dotenv").config;
 /* GET users listing. */
 router.get("/", function (req, res, next) {
@@ -12,16 +14,9 @@ router.get("/", function (req, res, next) {
 // to create a user
 router.post("/register", async (req, res, next) => {
   try {
-    console.log("this is to create account", req.body);
     let user = await User.create(req.body);
     let token = user.signToken();
-    res.status(201).json({
-      user: {
-        token: token,
-        username: user.username,
-        email: user.email,
-      },
-    });
+    res.status(201).json({ user: userJSON(user, token) });
   } catch (error) {
     next(error);
   }
@@ -50,13 +45,7 @@ router.post("/login", async (req, res, next) => {
     // if user password is mathced then generate  the user  jwt token
     // and send it to the user
     let token = user.signToken();
-    res.status(202).json({
-      user: {
-        token: token,
-        username: user.username,
-        email: user.email,
-      },
-    });
+    res.status(201).json({ user: userJSON(user, token) });
   } catch (error) {
     next(error);
   }
@@ -66,13 +55,7 @@ router.get("/currentuser", auth.isVerified, async (req, res, next) => {
   try {
     let currentuser = await User.findOne({ email: req.user.email });
     let token = currentuser.signToken();
-    res.status(202).json({
-      user: {
-        token: token,
-        username: currentuser.username,
-        email: currentuser.email,
-      },
-    });
+    res.status(202).json({ user: userJSON(currentuser, token) });
   } catch (error) {
     next(error);
   }

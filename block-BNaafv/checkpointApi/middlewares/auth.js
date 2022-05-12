@@ -21,17 +21,20 @@ module.exports = {
   optionalAuthorization: async function (req, res, next) {
     let token = req.headers.authorization;
     try {
-      if (token) {
-        let isVerified = jwt.verify(token, process.env.SECRET);
-        req.user = isVerified;
-        req.user.token = token;
-      } else {
-        req.user = null;
+      if (!token) {
+        req.user = {
+          id: null,
+          email: null,
+        };
+        return next();
       }
+      let payload = jwt.verify(token, process.env.SECRET);
+      req.user = payload;
+      req.user.token = token;
       return next();
     } catch (err) {
       return res
-        .status(500)
+        .status(401)
         .json({ error: "token is not valid you need to login again" });
     }
   },
